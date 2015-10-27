@@ -1,70 +1,177 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace AvlTrees
 {
-    public class Avl<T>
+    public class Avl<T> : IEnumerable<T>
         where T : IComparable<T>
     {
-        private class Node
+        private class Node : IEnumerable<T>
         {
-            private int size;
-            private int height;
-
             public T Value { get; set; }
             public Node Left { get; set; }
             public Node Right { get; set; }
 
-            public Node(T value)
+            public Node()
             {
-                this.size = 1;
-                this.height = 1;
-                this.Value = Value;
-                this.Left = null;
-                this.Right = null;
+                Left = null;
+                Right = null;
             }
 
-            private int Balance()
+            public IEnumerator<T> GetEnumerator()
             {
-                int leftHeight = (this.Left == null) ? 0 : this.Left.height;
-                int rightHeight = (this.Right == null) ? 0 : this.Right.height;
-                return leftHeight - rightHeight;
+                if(this.Left != null)
+                {
+                    foreach(var node in this.Left)
+                    {
+                        yield return node;
+                    }
+                }
+
+                yield return this.Value;
+
+                if(this.Right != null)
+                {
+                    foreach(var node in this.Right)
+                    {
+                        yield return node;
+                    }
+                }
             }
 
-            public void BalanceLeft()
+            IEnumerator IEnumerable.GetEnumerator()
             {
-
-            }
-
-            public void BalanceRight()
-            {
-
+                return this.GetEnumerator();
             }
         }
 
         private Node root;
+        private int size;
 
-        private void Add(Node node, T value)
+        public Avl()
+        {
+            root = null;
+            size = 0;
+        }
+
+        public int Size
+        {
+            get
+            {
+                return this.size;
+            }
+        }
+
+        private Node Add(Node node, T value)
         {
             if (node == null)
             {
-                node = new Node(value);
-                return;
+                ++this.size;
+                node = new Node();
+                node.Value = value;
+                return node;
             }
-            if (value.CompareTo(node.Value) < 0)
+
+            int cmp = value.CompareTo(node.Value);
+            if (cmp < 0)
             {
-                Add(node.Left, value);
-                node.BalanceLeft();
+                node.Left = this.Add(node.Left, value);
+            }
+            else if (cmp > 0)
+            {
+                node.Right = this.Add(node.Right, value);
             }
             else
             {
-                Add(node.Right, value);
-                node.BalanceRight();
+                // Already exist
             }
+            return node;
         }
 
         public void Add(T value)
         {
-            Add(this.root, value);
+            this.root = this.Add(this.root, value);
+        }
+
+        private bool Contains(T value)
+        {
+            Node x = this.root;
+            while (x != null)
+            {
+                int cmp = value.CompareTo(x.Value);
+                if (cmp == 0)
+                {
+                    return true;
+                }
+                x = (cmp < 0) ? x.Left : x.Right;
+            }
+            return false;
+        }
+
+        private Node Remove(Node node, T value)
+        {
+            if (node == null)
+            {
+                // Value not found
+                return null;
+            }
+
+            int cmp = value.CompareTo(node.Value);
+            if (cmp == 0)
+            {
+                // Found it
+                --this.size;
+
+                if (node.Right == null)
+                {
+                    return node.Left;
+                }
+
+                Node next = node.Right;
+                if(next.Left == null)
+                {
+                    next.Left = node.Left;
+                    return next;
+                }
+                while(next.Left.Left != null)
+                {
+                    next = next.Left;
+                }
+                var inorder = next.Left;
+                next.Left = inorder.Right;
+                inorder.Left = node.Left;
+                inorder.Right = node.Right;
+                return inorder;
+            }
+
+            if(cmp < 0)
+            {
+                node.Left = this.Remove(node.Left, value);
+            }
+            else
+            {
+                node.Right = this.Remove(node.Right, value);
+            }
+            return node;
+        }
+
+        public void Remove(T value)
+        {
+            this.root = this.Remove(this.root, value);
+        }
+
+        public IEnumerator<T> GetEnumerator()
+        {
+            foreach(var node in this.root)
+            {
+                yield return node;
+            }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return this.GetEnumerator();
         }
     }
 }

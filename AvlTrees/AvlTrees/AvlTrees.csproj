@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{9AAB80C3-3DA7-4BE1-960C-5906BB1FA77A}</ProjectGuid>
+    <ProjectGuid>{148495D3-E013-48EB-8955-E020415AADD8}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>AvlTrees</RootNamespace>
